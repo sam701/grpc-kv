@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package kv;
+
+service KeyValueStore {
+  rpc Set(KeyValue) returns (Empty);
+  rpc Get(Key) returns (KeyValue);
+}
+
+message KeyValue {
+  string key = 1;
+  string value = 2;
+}
+
+message Key {
+  string key = 1;
+}
+
+message Empty {}
