@@ -4,14 +4,12 @@ import (
 	"context"
 	"log"
 	"math/rand"
+	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/sam701/grpc-kv/kv"
-
-	"net/http"
-
-	"strconv"
 
 	"github.com/urfave/cli"
 	"google.golang.org/grpc"
@@ -22,9 +20,13 @@ func main() {
 	app.Version = "0.1.0"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
+			Name:   "kv-service",
+			Usage:  "Consul ervice name",
+			EnvVar: "KV_SERVICE",
+		},
+		cli.StringFlag{
 			Name:   "kv-server",
-			Usage:  "KV-Server `HOST:PORT` to connect to",
-			Value:  "localhost:12000",
+			Usage:  "KV-Server `HOST:PORT` to connect to (overwrites service)",
 			EnvVar: "KV_SERVER",
 		},
 		cli.StringFlag{
@@ -45,7 +47,10 @@ func main() {
 }
 
 func runWebServer(ctx *cli.Context) error {
-	client = createClient(ctx.String("kv-server"))
+	serviceName = ctx.String("kv-service")
+	serverAddr = ctx.String("kv-server")
+
+	client = createClient()
 
 	r := mux.NewRouter()
 
@@ -95,8 +100,8 @@ func setHandler(w http.ResponseWriter, r *http.Request) {
 
 var client kv.KeyValueStoreClient
 
-func createClient(addr string) kv.KeyValueStoreClient {
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+func createClient() kv.KeyValueStoreClient {
+	conn, err := grpc.Dial(getAddr(), grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
