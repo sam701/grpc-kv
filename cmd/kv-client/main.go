@@ -12,10 +12,11 @@ import (
 	"github.com/sam701/grpc-kv/kv"
 
 	"github.com/urfave/cli"
-	"google.golang.org/grpc"
 )
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	app := cli.NewApp()
 	app.Version = "0.1.0"
 	app.Flags = []cli.Flag{
@@ -47,10 +48,10 @@ func main() {
 }
 
 func runWebServer(ctx *cli.Context) error {
-	serviceName = ctx.String("kv-service")
-	serverAddr = ctx.String("kv-server")
+	serviceName := ctx.String("kv-service")
+	serverAddr := ctx.String("kv-server")
 
-	client = createClient()
+	client = createClient(serviceName, serverAddr)
 
 	r := mux.NewRouter()
 
@@ -96,14 +97,4 @@ func setHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.WriteHeader(204)
 	}
-}
-
-var client kv.KeyValueStoreClient
-
-func createClient() kv.KeyValueStoreClient {
-	conn, err := grpc.Dial(getAddr(), grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	return kv.NewKeyValueStoreClient(conn)
 }
