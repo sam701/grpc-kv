@@ -1,5 +1,5 @@
-./kv-client
-./kv-server
+kv-client
+kv-server
 data*
 docker/client/kv-client
 docker/server/kv-server
