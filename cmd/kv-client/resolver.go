@@ -33,7 +33,10 @@ func newAddrWatcher(target string) *addrWatcher {
 }
 
 func (s *addrWatcher) watchAddressChange() {
-	c, err := consul.NewClient(consul.DefaultConfig())
+	cfg := consul.DefaultConfig()
+	cfg.Address = consulAddr
+
+	c, err := consul.NewClient(cfg)
 	if err != nil {
 		log.Fatalln("ERROR", err)
 	}
@@ -48,8 +51,10 @@ func (s *addrWatcher) watchAddressChange() {
 		}
 		waitIndex = meta.LastIndex
 
-		se := services[0]
-		s.setCurrentAddress(fmt.Sprintf("%s:%d", se.ServiceAddress, se.ServicePort))
+		if len(services) > 0 {
+			se := services[0]
+			s.setCurrentAddress(fmt.Sprintf("%s:%d", se.ServiceAddress, se.ServicePort))
+		}
 	}
 }
 

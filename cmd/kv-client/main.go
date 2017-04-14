@@ -21,8 +21,13 @@ func main() {
 	app.Version = "0.1.0"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
+			Name:   "consul",
+			Usage:  "Consul host:port",
+			EnvVar: "CONSUL_ADDR",
+		},
+		cli.StringFlag{
 			Name:   "kv-service",
-			Usage:  "Consul ervice name",
+			Usage:  "Consul service name",
 			EnvVar: "KV_SERVICE",
 		},
 		cli.StringFlag{
@@ -47,9 +52,13 @@ func main() {
 
 }
 
+var consulAddr string
+
 func runWebServer(ctx *cli.Context) error {
 	serviceName := ctx.String("kv-service")
 	serverAddr := ctx.String("kv-server")
+
+	consulAddr = ctx.String("consul")
 
 	client = createClient(serviceName, serverAddr)
 
